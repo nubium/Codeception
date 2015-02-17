@@ -122,6 +122,10 @@ class SuiteManager
             $test->preload();
         }
 
+        if (!$this->isCurrentEnvironment($test->getScenario()->getEnv())) {
+            return;
+        }
+
         $groups = $this->groupManager->groupsForTest($test);
         $this->suite->addTest($test, $groups);
 
