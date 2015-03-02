@@ -1,11 +1,26 @@
 <?php
 namespace Codeception\Platform;
 
+use Codeception\Event\FailEvent;
+use Codeception\Event\SuiteEvent;
 use Codeception\Events;
 use Codeception\Event\TestEvent;
 
 class SimpleOutput extends Extension
 {
+
+    /**
+     * @var int
+     */
+    protected $counter = 0;
+
+    /**
+     * @var FailEvent
+     */
+    protected $lastFail;
+
+
+
     public function _initialize()
     {
         $this->options['silent'] = false; // turn on printing for this extension
@@ -21,24 +36,29 @@ class SimpleOutput extends Extension
         Events::TEST_ERROR   => 'error',
     );
 
-    public function beforeSuite()
+    public function beforeSuite(SuiteEvent $event)
     {
-        $this->writeln("");
+        $this->counter = 0;
+        $this->writeln('');
+        $this->writeln($event->getSuite()->getName().' (tests: '.count($event->getSuite()->tests()).')');
     }
 
     public function success()
     {
-        $this->write('[+] ');
+        $this->write('[+] '.$this->counter++.'. ');
+        $this->lastFail = NULL;
     }
 
-    public function fail()
+    public function fail(FailEvent $event)
     {
-        $this->write('[-] ');
+        $this->write('[-] '.$this->counter++.'. ');
+        $this->lastFail = $event;
     }
 
-    public function error()
+    public function error(FailEvent $event)
     {
-        $this->write('[E] ');
+        $this->write('[E] '.$this->counter++.'. ');
+        $this->lastFail = $event;
     }
 
     // we are printing test status and time taken
@@ -51,5 +71,9 @@ class SimpleOutput extends Extension
 
         $this->write($e->getTest()->toString());
         $this->writeln(' (' . $time . 's)');
+
+        if ($this->lastFail) {
+            $this->writeln('    '.$this->lastFail->getFail()->getMessage());
+        }
     }
 }
