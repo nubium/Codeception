@@ -296,8 +296,9 @@ class Configuration
             $settings = self::mergeConfigs($settings, $envConf);
         }
 
+        $suitePath = isset($settings['paths']['suitePath']) ? $settings['paths']['suitePath'] : $suite;
         $settings['path'] = self::$dir . DIRECTORY_SEPARATOR . $config['paths']['tests']
-            . DIRECTORY_SEPARATOR . $suite . DIRECTORY_SEPARATOR;
+            . DIRECTORY_SEPARATOR . $suitePath . DIRECTORY_SEPARATOR;
 
         return $settings;
     }
